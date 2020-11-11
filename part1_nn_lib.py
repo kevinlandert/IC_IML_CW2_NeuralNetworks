@@ -226,8 +226,8 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        self._W = None
-        self._b = None
+        self._W = xavier_init((self.n_in, self.n_out), 1.0)
+        self._b = np.zeros((1,self.n_out))
 
         self._cache_current = None
         self._grad_W_current = None
@@ -253,8 +253,9 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
-
+        z = x @ self._W + np.repeat(self._b,x.shape[0],axis=0)
+        self._cache_current = x
+        return z
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -270,13 +271,16 @@ class LinearLayer(Layer):
             grad_z {np.ndarray} -- Gradient array of shape (batch_size, n_out).
 
         Returns:
-            {np.ndarray} -- Array containing gradient with repect to layer
+            {np.ndarray} -- Array containing gradient with respect to layer
                 input, of shape (batch_size, n_in).
         """
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
+        self._grad_W_current = np.transpose(self._cache_current) @ grad_z
+        self._grad_b_current = np.ones((1,self._cache_current.shape[0])) @ grad_z
+        
+        return grad_z @ np.transpose(self._W)
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -293,7 +297,8 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
+        self._W += - learning_rate * self._grad_W_current
+        self._b += - learning_rate * self._grad_b_current
 
         #######################################################################
         #                       ** END OF YOUR CODE **
