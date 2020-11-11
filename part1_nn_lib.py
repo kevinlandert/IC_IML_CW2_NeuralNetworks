@@ -338,6 +338,21 @@ class MultiLayerNetwork(object):
         #                       ** START OF YOUR CODE **
         #######################################################################
         self._layers = None
+        layers = np.ndarray((len(self.neurons)*2),dtype=np.object)
+        n_in = self.input_dim
+        for i in range(len(self.neurons)):
+            layers[2*i] = LinearLayer(n_in,self.neurons[i])
+            n_in = self.neurons[i]
+            if (self.activations[i] == 'relu'):
+                layers[2*i+1] = ReluLayer()
+            elif (self.activations[i] == 'sigmoid'):
+                layers[2*i+1] = SigmoidLayer()
+            else:
+                layers[2*i+1] = 'identity'
+            
+        self._layers = layers
+                
+            
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -356,7 +371,11 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        return np.zeros((1, self.neurons[-1])) # Replace with your own code
+        z_temp = x
+        for i in range(len(self._layers)):
+            if not self._layers[i] == 'identity':
+                z_temp = self._layers[i].forward(z_temp)
+        return z_temp 
 
         #######################################################################
         #                       ** END OF YOUR CODE **
