@@ -399,8 +399,11 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
-
+        grad_z_temp = grad_z
+        for i in range(len(self._layers)-1,-1,-1):
+            if not self._layers[i] == 'identity':
+                grad_z_temp = self._layers[i].backward(grad_z_temp)
+        return grad_z_temp
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -416,8 +419,9 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
-
+        for i in range(len(self._layers)):
+            if isinstance(self._layers[i], LinearLayer):
+                self._layers[i].update_params(learning_rate)
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -477,7 +481,11 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        self._loss_layer = None
+        if loss_fun == 'cross_entropy':
+            self._loss_layer = MSELossLayer()
+        elif loss_fun == 'mse':
+            self._loss_layer = MSELossLayer()
+        #self._loss_layer = CrossEntropyLossLayer() if loss_fun == 'cross_entropy' else self._loss_layer = MSELossLayer()
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -500,8 +508,12 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
-
+        idx_list = np.arange(len(input_dataset))
+        np.random.shuffle(idx_list)
+        print(idx_list)
+        shuffled_inputs  = input_dataset[idx_list]
+        shuffled_targets  = target_dataset[idx_list]
+        return shuffled_inputs, shuffled_targets
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -529,7 +541,18 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
+        for i in range(self.nb_epoch):
+            if self.shuffle_flag == True:
+                input_dataset, target_dataset = self.shuffle(input_dataset, target_dataset)
+            input_dataset = [input_dataset[i:i + self.batch_size] for i in range(0, len(input_dataset), self.batch_size)]  
+            target_dataset = [target_dataset[i:i + self.batch_size] for i in range(0, len(target_dataset), self.batch_size)] 
+            
+            for i in range(len(input_dataset)):
+                y_pred = self.network(input_dataset[i])
+                loss = self._loss_layer.forward(y_pred, target_dataset[i])
+                grad_loss = self._loss_layer.backward()
+                self.network.backward(grad_loss)
+                self.network.update_params(self.learning_rate)
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -548,7 +571,10 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
+        y_pred = self.network(input_dataset)
+        return self._loss_layer.forward(y_pred, target_dataset)
+
+
 
         #######################################################################
         #                       ** END OF YOUR CODE **
