@@ -595,7 +595,10 @@ class Preprocessor(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
+        self.maximum = np.amax(data, axis = 0)
+        self.minimum = np.amin(data, axis = 0)
+        self.a = np.ones(data.shape[1])
+        self.b = np.zeros(data.shape[1])
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -614,8 +617,8 @@ class Preprocessor(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
-
+        normalized_data = self.a + (data - self.minimum) * (self.b-self.a) / (self.maximum - self.minimum)
+        return normalized_data
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -633,7 +636,8 @@ class Preprocessor(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        pass
+        reverted_data = (data - self.a) * (self.maximum - self.minimum) / (self.b-self.a) + self.minimum 
+        return reverted_data
 
         #######################################################################
         #                       ** END OF YOUR CODE **
