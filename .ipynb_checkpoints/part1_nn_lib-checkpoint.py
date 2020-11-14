@@ -510,7 +510,6 @@ class Trainer(object):
         #######################################################################
         idx_list = np.arange(len(input_dataset))
         np.random.shuffle(idx_list)
-        print(idx_list)
         shuffled_inputs  = input_dataset[idx_list]
         shuffled_targets  = target_dataset[idx_list]
         return shuffled_inputs, shuffled_targets
@@ -544,12 +543,12 @@ class Trainer(object):
         for i in range(self.nb_epoch):
             if self.shuffle_flag == True:
                 input_dataset, target_dataset = self.shuffle(input_dataset, target_dataset)
-            input_dataset = [input_dataset[i:i + self.batch_size] for i in range(0, len(input_dataset), self.batch_size)]  
-            target_dataset = [target_dataset[i:i + self.batch_size] for i in range(0, len(target_dataset), self.batch_size)] 
+            input_batches = [input_dataset[i:i + self.batch_size] for i in range(0, len(input_dataset), self.batch_size)]  
+            target_batches = [target_dataset[i:i + self.batch_size] for i in range(0, len(target_dataset), self.batch_size)] 
             
-            for i in range(len(input_dataset)):
-                y_pred = self.network(input_dataset[i])
-                loss = self._loss_layer.forward(y_pred, target_dataset[i])
+            for i in range(len(input_batches)):
+                y_pred = self.network(input_batches[i])
+                loss = self._loss_layer.forward(y_pred, target_batches[i])
                 grad_loss = self._loss_layer.backward()
                 self.network.backward(grad_loss)
                 self.network.update_params(self.learning_rate)
@@ -573,9 +572,6 @@ class Trainer(object):
         #######################################################################
         y_pred = self.network(input_dataset)
         return self._loss_layer.forward(y_pred, target_dataset)
-
-
-
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
