@@ -2,6 +2,12 @@ import torch
 import pickle
 import numpy as np
 import pandas as pd
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler,OrdinalEncoder
+from pickle import dump, load
+        
 
 class Regressor():
 
@@ -10,7 +16,7 @@ class Regressor():
         # Remember to set them with a default value for LabTS tests
         """ 
         Initialise the model.
-          
+    
         Arguments:
             - x {pd.DataFrame} -- Raw input data of shape 
                 (batch_size, input_size), used to compute the size 
@@ -24,11 +30,15 @@ class Regressor():
         #######################################################################
 
         # Replace this code with your own
+        self.fillval = {}
+        
+        
         X, _ = self._preprocessor(x, training = True)
+        self.X = X
         self.input_size = X.shape[1]
         self.output_size = 1
         self.nb_epoch = nb_epoch 
-        return
+        
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -59,8 +69,70 @@ class Regressor():
 
         # Replace this code with your own
         # Return preprocessed x and y, return None for y if it was None
-        return x, (y if isinstance(y, pd.DataFrame) else None)
+        
+        #ADJUST Y NONE
+        
+        #cont_columns = ['longitude', 'latitude', 'housing_median_age', 'total_rooms','total_bedrooms', 'population', 'households', 'median_income']
+        column_names = ['longitude', 'latitude', 'housing_median_age', 'total_rooms','total_bedrooms', 'population', 'households', 'median_income','ocean_proximity'] 
+        numeric_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms','total_bedrooms', 'population', 'households', 'median_income']
+        categorical_features = ['ocean_proximity']
+        
+        features = x[column_names]
+        
+        #Potentially do this with model saving
+        #If we've seen no data before fit preprocessors
+        if(training):
+            
+            numeric_transformer = Pipeline(steps = [
+                ('imputer', SimpleImputer(strategy = 'median')),
+                ('scaler', StandardScaler())
+            ])
+            
+            categorical_transformer = Pipeline(steps = [
+                ('ordinal', OrdinalEncoder()),
+                ('scaler',StandardScaler())
+            ])
+            
+            ct = ColumnTransformer(
+                transformers = [
+                    ('num', numeric_transformer, numeric_features),
+                    ('cat',categorical_transformer,categorical_features)
+                ])
+            
+            df_processed = ct.fit_transform(X = features)
+            
+            #Save Transfomer"
+            dump(ct, open("x_transformer.pkl","wb"))
+            
+            #Transform y
+            if y is not None:
+                y_scaler = StandardScaler()
+                processed_y = y_scaler.fit_transform(y)
+                dump(y_scaler, open("y_transformer.pkl","wb"))
 
+        #If we've seen data before transform with saved preprocessors
+        else:
+            
+            #Load Column Transformer and Transform data
+            ct = load(open('x_transformer.pkl', 'rb'))
+            df_processed = ct.transform(features)
+               
+            #Transform y
+            if y is not None:
+                y_scaler = load(open('y_transformer.pkl', 'rb'))
+                processed_y = y_scaler.transform(y)
+
+
+                
+        #Transform to Tensors
+        x_tensor = torch.tensor(df_processed,dtype = torch.float32)
+        
+        if y is not None:
+            y_tensor = torch.tensor(processed_y,dtype = torch.float32)
+        
+        
+        return x_tensor, (y_tensor if isinstance(y, pd.DataFrame) else None)
+        
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
