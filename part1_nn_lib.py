@@ -482,7 +482,7 @@ class Trainer(object):
         #                       ** START OF YOUR CODE **
         #######################################################################
         if loss_fun == 'cross_entropy':
-            self._loss_layer = MSELossLayer()
+            self._loss_layer = CrossEntropyLossLayer()
         elif loss_fun == 'mse':
             self._loss_layer = MSELossLayer()
         #self._loss_layer = CrossEntropyLossLayer() if loss_fun == 'cross_entropy' else self._loss_layer = MSELossLayer()
@@ -548,7 +548,7 @@ class Trainer(object):
             
             for i in range(len(input_batches)):
                 y_pred = self.network(input_batches[i])
-                loss = self._loss_layer.forward(y_pred, target_batches[i])
+                self._loss_layer.forward(y_pred, target_batches[i])
                 grad_loss = self._loss_layer.backward()
                 self.network.backward(grad_loss)
                 self.network.update_params(self.learning_rate)
