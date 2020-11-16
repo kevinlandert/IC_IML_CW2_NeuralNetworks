@@ -1,12 +1,19 @@
 import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.utils.data as data
 import pickle
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler,OrdinalEncoder
+from sklearn.preprocessing import StandardScaler,OrdinalEncoder,MinMaxScaler
 from pickle import dump, load
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error,explained_variance_score,r2_score
+
+from matplotlib import pyplot as plt
         
 
 class Regressor():
@@ -29,15 +36,33 @@ class Regressor():
         #                       ** START OF YOUR CODE **
         #######################################################################
 
-        # Replace this code with your own
-        self.fillval = {}
-        
-        
+
         X, _ = self._preprocessor(x, training = True)
         self.X = X
         self.input_size = X.shape[1]
         self.output_size = 1
         self.nb_epoch = nb_epoch 
+        self.batch_size = 1000
+        self.running_loss = 0
+        self.folds = 2
+        
+        #Networkk -> Adjust structure at the bottom
+        self.network = Network(input_dim = self.input_size,output_dim = self.output_size)
+        
+        #Optimizer
+        self.optimizer = optim.SGD(self.network.parameters(), lr = 0.01)
+        #self.optimizer = optim.Adagrad(self.network.parameters(), lr=0.01, lr_decay=0, weight_decay=0.01, initial_accumulator_value=0, eps=1e-10)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
 
         #######################################################################
@@ -78,6 +103,7 @@ class Regressor():
         categorical_features = ['ocean_proximity']
         
         features = x[column_names]
+        outputs = y
         
         #Potentially do this with model saving
         #If we've seen no data before fit preprocessors
@@ -104,10 +130,10 @@ class Regressor():
             #Save Transfomer"
             dump(ct, open("x_transformer.pkl","wb"))
             
-            #Transform y
+            #Transform y -> is probably not necessary
             if y is not None:
-                y_scaler = StandardScaler()
-                processed_y = y_scaler.fit_transform(y)
+                y_scaler = MinMaxScaler()
+                outputs = y_scaler.fit_transform(outputs)
                 dump(y_scaler, open("y_transformer.pkl","wb"))
 
         #If we've seen data before transform with saved preprocessors
@@ -120,7 +146,7 @@ class Regressor():
             #Transform y
             if y is not None:
                 y_scaler = load(open('y_transformer.pkl', 'rb'))
-                processed_y = y_scaler.transform(y)
+                outputs = y_scaler.transform(outputs)
 
 
                 
@@ -128,7 +154,7 @@ class Regressor():
         x_tensor = torch.tensor(df_processed,dtype = torch.float32)
         
         if y is not None:
-            y_tensor = torch.tensor(processed_y,dtype = torch.float32)
+            y_tensor = torch.tensor(outputs,dtype = torch.float32)
         
         
         return x_tensor, (y_tensor if isinstance(y, pd.DataFrame) else None)
@@ -156,8 +182,85 @@ class Regressor():
         #                       ** START OF YOUR CODE **
         #######################################################################
 
+        #Preprocess input data
         X, Y = self._preprocessor(x, y = y, training = True) # Do not forget
+
+        #Saves losses
+        #[0,fold,epoch] -> for training losses
+        #[1,fold,epoch] -> for validation losses
+        losses = np.zeros((2,self.folds,self.nb_epoch))
+        
+        #10 fold crossvalidation with 9 for training 1 for validation
+        kfold = KFold(n_splits = self.folds)
+        folds = kfold.split(np.arange(X.shape[0]))
+        
+        for fold, (train_index,val_index) in enumerate(folds):
+            
+            #Data to train
+            x_train = X[train_index]
+            y_train = Y[train_index]
+            
+            #Data to evaluate
+            x_val = X[val_index]
+            y_val = Y[val_index]
+            
+            #To do batching on training data
+            torch_dataset_train = data.TensorDataset(x_train,y_train)
+            data_loader_train = data.DataLoader(dataset = torch_dataset_train,batch_size = self.batch_size,shuffle = True)
+            
+            #To do batching on validation data -> for later
+            torch_dataset_val = data.TensorDataset(x_val,y_val)
+            data_loader_val = data.DataLoader(dataset = torch_dataset_val,batch_size = self.batch_size, shuffle = False)
+            
+        
+            for epoch in range(self.nb_epoch):
+            
+                
+                #Set network to training mode
+                self.network.train()
+                
+                #Batching in every epoch
+                for step, (batch_x, batch_y) in enumerate(data_loader_train):
+                
+                
+                    #Forward prop
+                    prediction = self.network(batch_x)
+                    
+                    #Compute Loss
+                    self.optimizer.zero_grad()
+                    loss = nn.MSELoss()(prediction,batch_y)
+                    
+                    #Backward prop
+                    loss.backward()
+                    
+                    #Update parameters
+                    self.optimizer.step()
+        
+        
+                #Evaluate after every epoch
+                self.network.eval()
+                
+                #Compute total loss on training data
+                prediction = self.network.forward(x_train).detach()
+                train_loss = nn.MSELoss()(prediction,y_train)
+                losses[0,fold,epoch] = train_loss
+                
+                #Compute total loss on validation data
+                prediction = self.network.forward(x_val).detach()
+                val_loss = nn.MSELoss()(prediction,y_val)
+                losses[1,fold,epoch] = val_loss
+                
+                #Print losses every 20 folds               
+                if ((epoch % 20) == 0) & (epoch != 0):
+                    print("Fold: {}\t - Episode: {}\t - Training Loss:  {}\t - Validation Loss: {}".format(fold,epoch,train_loss,val_loss))
+                
+            #Just one fold for now 
+            break
+        
+        self.loss = losses
+        
         return self
+    
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -181,8 +284,19 @@ class Regressor():
         #                       ** START OF YOUR CODE **
         #######################################################################
 
+        #Preprocess data we want to predict
         X, _ = self._preprocessor(x, training = False) # Do not forget
-        pass
+        
+        #Return data we want to evaluate
+        self.network.eval()
+        prediction = self.network.forward(X).detach().numpy()
+        
+        
+        return prediction
+        
+        
+        
+        
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -207,7 +321,32 @@ class Regressor():
         #######################################################################
 
         X, Y = self._preprocessor(x, y = y, training = False) # Do not forget
-        return 0 # Replace this code with your own
+        
+        Y = Y.numpy() #Output from predict is array
+        prediction = self.predict(x)
+        
+        #Typical regression evaluation scores
+        mse = mean_squared_error(prediction,Y)
+        ex_var = explained_variance_score(prediction,Y)
+        r2 = r2_score(prediction,Y)
+        
+        
+        
+        print(mse)
+        print(ex_var)
+        print(r2)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        return mean_squared_error(prediction,Y) # Replace this code with your own
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -272,22 +411,60 @@ def example_main():
     data = pd.read_csv("housing.csv") 
 
     # Spliting input and output
-    x_train = data.loc[:, data.columns != output_label]
-    y_train = data.loc[:, [output_label]]
+    x = data.loc[:, data.columns != output_label]
+    y = data.loc[:, [output_label]]
 
     # Training
     # This example trains on the whole available dataset. 
     # You probably want to separate some held-out data 
     # to make sure the model isn't overfitting
-    regressor = Regressor(x_train, nb_epoch = 10)
+    
+    #Todo: Adjust with shuffling
+    x_train = x[2000:]
+    y_train = y[2000:]
+    x_test = x_train[0:2000]
+    y_test = y_train[:2000]
+    
+    
+    regressor = Regressor(x_train, nb_epoch = 1000)
     regressor.fit(x_train, y_train)
     save_regressor(regressor)
 
+    #plt.plot(np.arange(100),regressor.training_loss)
+    #plt.savefig("loss.png")
+    
+    pred = regressor.predict(x_test)
+    
+
     # Error
-    error = regressor.score(x_train, y_train)
+    error = regressor.score(x_test, y_test)
     print("\nRegressor error: {}\n".format(error))
 
+    
+class Network(nn.Module):
+    
+    def __init__(self,input_dim,output_dim):
+        
+        super(Network,self).__init__()
+        
+        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 64)
+        self.layer_2 = nn.Linear(in_features = 64, out_features = 32)
+        self.layer_3 = nn.Linear(in_features = 32, out_features = 16)
+        self.output_layer = torch.nn.Linear(in_features=16, out_features=output_dim)
+        
+    def forward(self,input):
+        
+        layer_1_output = torch.nn.functional.relu(self.layer_1(input))
+        layer_2_output = torch.nn.functional.relu(self.layer_2(layer_1_output))
+        layer_3_output = torch.nn.functional.relu(self.layer_3(layer_2_output))
+        output = torch.sigmoid(self.output_layer(layer_3_output))
+        return output    
+    
 
 if __name__ == "__main__":
     example_main()
 
+
+        
+       
+    
