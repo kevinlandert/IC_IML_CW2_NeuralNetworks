@@ -42,17 +42,17 @@ class Regressor():
         self.input_size = X.shape[1]
         self.output_size = 1
         self.nb_epoch = nb_epoch 
-        self.batch_size = 1000
+        self.batch_size = 64
         self.running_loss = 0
-        self.folds = 2
+        self.folds = 10
         
         #Networkk -> Adjust structure at the bottom
         self.network = Network(input_dim = self.input_size,output_dim = self.output_size)
         
         #Optimizer
-        self.optimizer = optim.SGD(self.network.parameters(), lr = 0.01)
+        #self.optimizer = optim.SGD(self.network.parameters(), lr = 0.01)
         #self.optimizer = optim.Adagrad(self.network.parameters(), lr=0.01, lr_decay=0, weight_decay=0.01, initial_accumulator_value=0, eps=1e-10)
-        
+        self.optimizer = optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
         
         
         
@@ -154,8 +154,8 @@ class Regressor():
         x_tensor = torch.tensor(df_processed,dtype = torch.float32)
         
         if y is not None:
-            y_tensor = torch.tensor(outputs,dtype = torch.float32)
-        
+            #y_tensor = torch.tensor(outputs,dtype = torch.float32)
+            y_tensor = torch.tensor(y.values,dtype = torch.float32)
         
         return x_tensor, (y_tensor if isinstance(y, pd.DataFrame) else None)
         
@@ -188,29 +188,30 @@ class Regressor():
         #Saves losses
         #[0,fold,epoch] -> for training losses
         #[1,fold,epoch] -> for validation losses
-        losses = np.zeros((2,self.folds,self.nb_epoch))
+        rel_losses = np.zeros((2,self.folds,self.nb_epoch))
+        abs_losses= np.zeros((2,self.folds,self.nb_epoch))
         
         #10 fold crossvalidation with 9 for training 1 for validation
         kfold = KFold(n_splits = self.folds)
         folds = kfold.split(np.arange(X.shape[0]))
         
         for fold, (train_index,val_index) in enumerate(folds):
-            
+
             #Data to train
-            x_train = X[train_index]
-            y_train = Y[train_index]
+            x_train = X[train_index].detach()
+            y_train = Y[train_index].detach()
             
             #Data to evaluate
-            x_val = X[val_index]
-            y_val = Y[val_index]
+            x_val = X[val_index].detach()
+            y_val = Y[val_index].detach()
             
             #To do batching on training data
             torch_dataset_train = data.TensorDataset(x_train,y_train)
             data_loader_train = data.DataLoader(dataset = torch_dataset_train,batch_size = self.batch_size,shuffle = True)
             
             #To do batching on validation data -> for later
-            torch_dataset_val = data.TensorDataset(x_val,y_val)
-            data_loader_val = data.DataLoader(dataset = torch_dataset_val,batch_size = self.batch_size, shuffle = False)
+            #torch_dataset_val = data.TensorDataset(x_val,y_val)
+            #data_loader_val = data.DataLoader(dataset = torch_dataset_val,batch_size = self.batch_size, shuffle = False)
             
         
             for epoch in range(self.nb_epoch):
@@ -227,10 +228,11 @@ class Regressor():
                     prediction = self.network(batch_x)
                     
                     #Compute Loss
-                    self.optimizer.zero_grad()
+
                     loss = nn.MSELoss()(prediction,batch_y)
                     
                     #Backward prop
+                    self.optimizer.zero_grad()
                     loss.backward()
                     
                     #Update parameters
@@ -242,22 +244,32 @@ class Regressor():
                 
                 #Compute total loss on training data
                 prediction = self.network.forward(x_train).detach()
-                train_loss = nn.MSELoss()(prediction,y_train)
-                losses[0,fold,epoch] = train_loss
+                train_loss_abs = nn.MSELoss()(prediction,y_train)
+                abs_losses[0,fold,epoch] = train_loss_abs
+                
+                #Average relative distance from true value
+                train_loss_rel = torch.sum(torch.div(torch.abs(torch.sub(prediction,y_train)),y_train)) / y_train.shape[0]
+                rel_losses[0,fold,epoch] = train_loss_rel
+                
                 
                 #Compute total loss on validation data
                 prediction = self.network.forward(x_val).detach()
-                val_loss = nn.MSELoss()(prediction,y_val)
-                losses[1,fold,epoch] = val_loss
+                val_loss_abs = nn.MSELoss()(prediction,y_val)
+                abs_losses[1,fold,epoch] = val_loss_abs
+                
+                val_loss_rel = torch.sum(torch.div(torch.abs(torch.sub(prediction,y_val)),y_val)) / y_val.shape[0]
+                rel_losses[1,fold,epoch] = val_loss_rel
+                
                 
                 #Print losses every 20 folds               
                 if ((epoch % 20) == 0) & (epoch != 0):
-                    print("Fold: {}\t - Episode: {}\t - Training Loss:  {}\t - Validation Loss: {}".format(fold,epoch,train_loss,val_loss))
+                    print("Fold: {}\t - Episode: {}\t - Training Loss:  {}\t - Validation Loss: {}".format(fold,epoch,train_loss_rel,val_loss_rel))
                 
             #Just one fold for now 
             break
         
-        self.loss = losses
+        self.loss_abs = abs_losses
+        self.loss_rel = rel_losses
         
         return self
     
@@ -329,8 +341,6 @@ class Regressor():
         mse = mean_squared_error(prediction,Y)
         ex_var = explained_variance_score(prediction,Y)
         r2 = r2_score(prediction,Y)
-        
-        
         
         print(mse)
         print(ex_var)
@@ -409,7 +419,10 @@ def example_main():
     # Feel free to use another CSV reader tool
     # But remember that LabTS tests take Pandas Dataframe as inputs
     data = pd.read_csv("housing.csv") 
-
+    
+    #Randomly shuffle the data
+    data = data.sample(frac = 1).reset_index(drop = True)
+    
     # Spliting input and output
     x = data.loc[:, data.columns != output_label]
     y = data.loc[:, [output_label]]
@@ -430,10 +443,20 @@ def example_main():
     regressor.fit(x_train, y_train)
     save_regressor(regressor)
 
-    #plt.plot(np.arange(100),regressor.training_loss)
-    #plt.savefig("loss.png")
+    #Plots our training and validation loss
+    plt.plot(np.arange(regressor.loss_rel.shape[2]),regressor.loss_rel[0,0,:],label = 'training_loss')
+    plt.plot(np.arange(regressor.loss_rel.shape[2]),regressor.loss_rel[1,0,:],label = 'validation_loss')
+    plt.yscale("log")
+    plt.legend()
+    plt.show()
+    plt.savefig("loss.png")
     
     pred = regressor.predict(x_test)
+    
+    #scaler = load(open('y_transformer.pkl', 'rb'))
+    #print(scaler.inverse_transform(pred))
+    print(pred)
+    print(y_test)
     
 
     # Error
@@ -447,17 +470,17 @@ class Network(nn.Module):
         
         super(Network,self).__init__()
         
-        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 64)
-        self.layer_2 = nn.Linear(in_features = 64, out_features = 32)
-        self.layer_3 = nn.Linear(in_features = 32, out_features = 16)
-        self.output_layer = torch.nn.Linear(in_features=16, out_features=output_dim)
+        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 100)
+        self.layer_2 = nn.Linear(in_features = 100, out_features = 100)
+        self.layer_3 = nn.Linear(in_features = 100, out_features = 100)
+        self.output_layer = torch.nn.Linear(in_features=100, out_features=output_dim)
         
     def forward(self,input):
         
         layer_1_output = torch.nn.functional.relu(self.layer_1(input))
         layer_2_output = torch.nn.functional.relu(self.layer_2(layer_1_output))
         layer_3_output = torch.nn.functional.relu(self.layer_3(layer_2_output))
-        output = torch.sigmoid(self.output_layer(layer_3_output))
+        output = self.output_layer(layer_3_output)
         return output    
     
 
