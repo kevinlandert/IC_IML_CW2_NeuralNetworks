@@ -13,9 +13,10 @@ from sklearn.preprocessing import StandardScaler,OrdinalEncoder,MinMaxScaler
 from pickle import dump, load
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error,explained_variance_score,r2_score
-
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning import Trainer
 from matplotlib import pyplot as plt
-
+import sys
 import wandb
 #from wandb.keras import WandbCallback
 
@@ -360,17 +361,7 @@ class Regressor():
         print(mse)
         print(ex_var)
         print(r2)
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         return mean_squared_error(prediction,Y) # Replace this code with your own
 
         #######################################################################
@@ -400,7 +391,7 @@ def load_regressor():
 
 
 
-def RegressorHyperParameterSearch(): 
+def RegressorHyperParameterSearch(metrics): 
     # Ensure to add whatever inputs you deem necessary to this function
     """
     Performs a hyper-parameter for fine-tuning the regressor implemented 
@@ -418,14 +409,15 @@ def RegressorHyperParameterSearch():
     #                       ** START OF YOUR CODE **
     #######################################################################
     
-    # define the parameters
+    wandb.log(metrics)
+
     return  # Return the chosen hyper parameters
 
     #######################################################################
     #                       ** END OF YOUR CODE **
     #######################################################################
 
-
+    
 hyperparameter_defaults = {
     "dropout" : 0.5, 
     "nb_epoch": 1000,
@@ -433,13 +425,15 @@ hyperparameter_defaults = {
     "folds": 10,
     "out_features" : 100,
     "lr" : 0.001
-}
+    }
 
-wandb.init(config = hyperparameter_defaults, project = "neural_networks_51")
+resume = sys.argv[-1] == "--resume"
+wandb.init(config=hyperparameter_defaults, project = "neural_networks_51", resume=resume)
 config = wandb.config 
-
-
+    
+    
 def example_main():
+    
 
     output_label = "median_house_value"
 
@@ -466,6 +460,8 @@ def example_main():
     x_test = x_train[0:2000]
     y_test = y_train[:2000]
     
+    wandb_logger = WandbLogger()
+    trainer = Trainer(logger=wandb_logger)
     
     regressor = Regressor(x_train, config)
     regressor.fit(x_train, y_train)
@@ -475,12 +471,10 @@ def example_main():
     validation_loss = regressor.loss_rel[1,0,:]
     error = regressor.score(x_test, y_test)
 
-    metrics = {'training_loss':training_loss, 'validation_loss': validation_loss, 'error':error}
-    wandb.log(metrics)
-
 
     #Plots our training and validation loss
     plt.plot(np.arange(regressor.loss_rel.shape[2]),training_loss,label = 'training_loss')
+
     plt.plot(np.arange(regressor.loss_rel.shape[2]),validation_loss,label = 'validation_loss')
     plt.yscale("log")
     plt.legend()
@@ -493,6 +487,10 @@ def example_main():
     #print(scaler.inverse_transform(pred))
     print(pred)
     print(y_test)
+    
+    metrics = {'loss_chart':plt, 'error':error, 'prediction': pred, 'y_test':y_test}
+    
+    RegressorHyperParameterSearch(metrics)
     
 
     # Error

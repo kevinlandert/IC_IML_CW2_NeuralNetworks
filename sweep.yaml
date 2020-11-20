@@ -12,10 +12,7 @@ parameters:
     max: 0.7
   nb_epochs:
     min: 1000
-    max: 10000
+    max: 100000
   folds:
     min: 5
     max: 15
-  out_features:
-    min: 50
-    max: 200
