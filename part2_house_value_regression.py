@@ -13,6 +13,9 @@ from pickle import dump, load
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error,explained_variance_score,r2_score
 
+#from skorch import NeuralNetRegressor
+#from sklearn.model_selection import GridSearchCV
+
 from matplotlib import pyplot as plt
         
 
@@ -402,7 +405,45 @@ def RegressorHyperParameterSearch():
     #######################################################################
     #                       ** START OF YOUR CODE **
     #######################################################################
-
+    data = pd.read_csv("housing.csv") 
+    
+    #Randomly shuffle the data
+    data = data.sample(frac = 1).reset_index(drop = True)
+    x = data.loc[:, data.columns != output_label]
+    y = data.loc[:, [output_label]]
+    
+    X, Y = self._preprocessor(x, y = y, training = False)
+    
+    """ Does not work because we cannot use scorch
+    net = NeuralNetRegressor(Network
+                         , max_epochs=100
+                         , optimizer=optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+                         , lr=0.001
+                         , verbose=1)
+    
+    params = {
+    'lr': [0.001,0.005, 0.01, 0.05, 0.1, 0.2, 0.3],
+    'max_epochs': list(range(500,5500, 500))
+    }
+    
+    gs = GridSearchCV(net, params, refit=False, scoring='r2', verbose=1, cv=10)
+    
+    gs.fit(X,Y)
+    """
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     return  # Return the chosen hyper parameters
 
     #######################################################################
@@ -463,6 +504,8 @@ def example_main():
     error = regressor.score(x_test, y_test)
     print("\nRegressor error: {}\n".format(error))
 
+
+        
     
 class Network(nn.Module):
     
@@ -485,8 +528,10 @@ class Network(nn.Module):
     
 
 if __name__ == "__main__":
+    
+    
     example_main()
-
+    
 
         
        
