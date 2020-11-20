@@ -146,6 +146,9 @@ class SigmoidLayer(Layer):
         #######################################################################
         x = self._cache_current
         sigmoid_derivative = np.exp(-x)/(1+np.exp(-x))**2
+        
+        assert grad_z.shape == sigmoid_derivative.shape
+        
         return np.multiply(grad_z, sigmoid_derivative)
 
         #######################################################################
@@ -206,6 +209,9 @@ class ReluLayer(Layer):
         #######################################################################
         x = self._cache_current
         relu_derivative = (x > 0) * 1
+        
+        assert grad_z.shape == relu_derivative.shape
+        
         return np.multiply(grad_z, relu_derivative)
 
         #######################################################################
@@ -259,6 +265,7 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        assert (x.shape[1] == self._W.shape[0])
         z = x @ self._W + np.repeat(self._b,x.shape[0],axis=0)
         self._cache_current = x
         return z
@@ -283,6 +290,8 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        assert (np.transpose(self._cache_current).shape[1] == grad_z[0]) & (np.ones((1,self._cache_current.shape[0])).shape[1] == grad_z[0]) & (grad_z.shape[1] == np.transpose(self._W).shape[0])
+        
         self._grad_W_current = np.transpose(self._cache_current) @ grad_z
         self._grad_b_current = np.ones((1,self._cache_current.shape[0])) @ grad_z
         
