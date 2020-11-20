@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "part2_house_value_regression.py", line 526, in <module>
+    example_main()
+  File "part2_house_value_regression.py", line 462, in example_main
+    regressor = Regressor(x_train, nb_epoch = 1000)
+TypeError: __init__() got an unexpected keyword argument 'nb_epoch'

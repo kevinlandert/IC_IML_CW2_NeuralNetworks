@@ -1,0 +1,146 @@
+2020-11-20 12:09:35,952 INFO    MainThread:36317 [internal.py:wandb_internal():63] W&B internal server running at pid: 36317
+2020-11-20 12:09:35,954 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: check_version
+2020-11-20 12:09:35,954 INFO    WriterThread:36317 [datastore.py:open_for_write():76] open: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/run-3sa8z4uc.wandb
+2020-11-20 12:09:35,955 DEBUG   SenderThread:36317 [sender.py:send():90] send: header
+2020-11-20 12:09:35,955 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:35,955 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: check_version
+2020-11-20 12:09:35,960 DEBUG   Thread-4  :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): pypi.org:443
+2020-11-20 12:09:36,067 DEBUG   Thread-4  :36317 [connectionpool.py:_make_request():396] https://pypi.org:443 "GET /pypi/wandb/json HTTP/1.1" 200 51947
+2020-11-20 12:09:36,101 DEBUG   SenderThread:36317 [sender.py:send():90] send: run
+2020-11-20 12:09:36,106 DEBUG   SenderThread:36317 [cmd.py:execute():719] Popen(['git', 'cat-file', '--batch-check'], cwd=/Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51, universal_newlines=False, shell=None, istream=<valid stream>)
+2020-11-20 12:09:36,122 DEBUG   SenderThread:36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:36,383 DEBUG   SenderThread:36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:36,392 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: run_start
+2020-11-20 12:09:36,396 INFO    SenderThread:36317 [dir_watcher.py:__init__():165] watching files in: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files
+2020-11-20 12:09:36,396 INFO    SenderThread:36317 [sender.py:_start_run_threads():490] run started: 3sa8z4uc with start time 1605874175
+2020-11-20 12:09:36,396 DEBUG   SenderThread:36317 [sender.py:send():90] send: summary
+2020-11-20 12:09:36,397 INFO    SenderThread:36317 [sender.py:_save_file():568] saving file wandb-summary.json with policy end
+2020-11-20 12:09:36,397 DEBUG   HandlerThread:36317 [cmd.py:execute():719] Popen(['git', 'cat-file', '--batch-check'], cwd=/Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51, universal_newlines=False, shell=None, istream=<valid stream>)
+2020-11-20 12:09:36,415 DEBUG   HandlerThread:36317 [cmd.py:execute():719] Popen(['git', 'rev-parse', '--show-toplevel'], cwd=/Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51, universal_newlines=False, shell=None, istream=None)
+2020-11-20 12:09:36,429 DEBUG   SenderThread:36317 [sender.py:send():90] send: files
+2020-11-20 12:09:36,429 INFO    SenderThread:36317 [sender.py:_save_file():568] saving file wandb-metadata.json with policy now
+2020-11-20 12:09:36,430 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: status
+2020-11-20 12:09:36,430 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,430 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: status
+2020-11-20 12:09:36,442 DEBUG   SenderThread:36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:36,445 DEBUG   Thread-11 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:36,554 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: poll_exit
+2020-11-20 12:09:36,669 DEBUG   SenderThread:36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:36,671 DEBUG   SenderThread:36317 [sender.py:send():90] send: exit
+2020-11-20 12:09:36,672 INFO    SenderThread:36317 [sender.py:send_exit():168] handling exit code: 1
+2020-11-20 12:09:36,672 INFO    SenderThread:36317 [sender.py:send_exit():176] send defer
+2020-11-20 12:09:36,672 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,672 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: poll_exit
+2020-11-20 12:09:36,672 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:36,673 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 0
+2020-11-20 12:09:36,673 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,673 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:36,673 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 0
+2020-11-20 12:09:36,673 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 1
+2020-11-20 12:09:36,673 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:36,674 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 1
+2020-11-20 12:09:36,679 DEBUG   Thread-11 :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:36,686 DEBUG   Thread-11 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): storage.googleapis.com:443
+2020-11-20 12:09:36,700 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,700 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:36,700 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 1
+2020-11-20 12:09:36,700 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 2
+2020-11-20 12:09:36,700 DEBUG   SenderThread:36317 [sender.py:send():90] send: stats
+2020-11-20 12:09:36,701 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:36,701 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 2
+2020-11-20 12:09:36,701 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,701 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:36,701 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 2
+2020-11-20 12:09:36,701 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 3
+2020-11-20 12:09:36,701 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:36,701 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 3
+2020-11-20 12:09:36,701 DEBUG   SenderThread:36317 [sender.py:send():90] send: summary
+2020-11-20 12:09:36,702 INFO    SenderThread:36317 [sender.py:_save_file():568] saving file wandb-summary.json with policy end
+2020-11-20 12:09:36,702 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,702 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:36,702 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 3
+2020-11-20 12:09:36,702 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 4
+2020-11-20 12:09:36,702 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:36,702 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 4
+2020-11-20 12:09:36,703 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:36,703 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:36,703 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 4
+2020-11-20 12:09:36,703 INFO    SenderThread:36317 [dir_watcher.py:finish():279] shutting down directory watcher
+2020-11-20 12:09:37,070 DEBUG   Thread-11 :36317 [connectionpool.py:_make_request():396] https://storage.googleapis.com:443 "PUT /wandb-production.appspot.com/daphned/neural_networks_51/3sa8z4uc/wandb-metadata.json?Expires=1605960576&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=i9Zq9JrGZlyK%2FoSvyuwWRlkYAdOi3uGZkEMCNfHQGEEldkOMrmWVUCg3%2BO6WUno1fvUd%2BMUH5reaI44gicgFcA1iFvORQh%2BACTnlktrzqKvlQSootEZ%2BITYArvSku3fypkRwTKvQljQ75%2FC9ZJy9HsvNkpbAliBfOBCIpYJX0itQg2ig%2BUF5FdtwS4mn8B98XnV7i6J86OMEO9V8YuoAOBn%2BqAL8smS7cf45sc5HaFfZ14VmSUcR%2F6q7PAd41i3KJmaKyee5b7nRmyCJFgx1zK13%2FZofWsZUMqgYkUQwbsrfggWhKcKxGf2pCQSa9W5RGAJPMQI47fZnxg1IxHKt6g%3D%3D HTTP/1.1" 200 0
+2020-11-20 12:09:37,074 INFO    Thread-11 :36317 [upload_job.py:push():131] Uploaded file /var/folders/mr/_jqqcd6d5l3ckwl5wv0v_pfc0000gn/T/tmpzqgupow3wandb/4qe0lnft-wandb-metadata.json
+2020-11-20 12:09:37,401 INFO    SenderThread:36317 [dir_watcher.py:_on_file_created():213] file/dir created: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/wandb-metadata.json
+2020-11-20 12:09:37,401 INFO    SenderThread:36317 [dir_watcher.py:_on_file_created():213] file/dir created: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/output.log
+2020-11-20 12:09:37,402 INFO    SenderThread:36317 [dir_watcher.py:_on_file_created():213] file/dir created: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/wandb-summary.json
+2020-11-20 12:09:37,402 INFO    SenderThread:36317 [dir_watcher.py:_on_file_created():213] file/dir created: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/requirements.txt
+2020-11-20 12:09:37,402 INFO    SenderThread:36317 [dir_watcher.py:finish():309] scan: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files
+2020-11-20 12:09:37,403 INFO    SenderThread:36317 [dir_watcher.py:finish():315] scan save: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/requirements.txt requirements.txt
+2020-11-20 12:09:37,403 INFO    SenderThread:36317 [dir_watcher.py:finish():315] scan save: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/output.log output.log
+2020-11-20 12:09:37,406 INFO    SenderThread:36317 [dir_watcher.py:finish():315] scan save: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/config.yaml config.yaml
+2020-11-20 12:09:37,406 INFO    SenderThread:36317 [dir_watcher.py:finish():315] scan save: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/wandb-summary.json wandb-summary.json
+2020-11-20 12:09:37,409 INFO    SenderThread:36317 [dir_watcher.py:finish():315] scan save: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/wandb-metadata.json wandb-metadata.json
+2020-11-20 12:09:37,410 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 5
+2020-11-20 12:09:37,413 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:37,414 DEBUG   Thread-12 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:37,416 DEBUG   Thread-13 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:37,417 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 5
+2020-11-20 12:09:37,418 DEBUG   Thread-14 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:37,418 DEBUG   Thread-15 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:37,419 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:37,419 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:37,419 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 5
+2020-11-20 12:09:37,420 INFO    SenderThread:36317 [file_pusher.py:finish():169] shutting down file pusher
+2020-11-20 12:09:37,420 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 6
+2020-11-20 12:09:37,420 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:37,420 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 6
+2020-11-20 12:09:37,420 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:37,420 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:37,421 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 6
+2020-11-20 12:09:37,423 DEBUG   Thread-5  :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): api.wandb.ai:443
+2020-11-20 12:09:38,544 DEBUG   Thread-15 :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:38,547 DEBUG   Thread-12 :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:38,553 DEBUG   Thread-14 :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:38,557 DEBUG   Thread-15 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): storage.googleapis.com:443
+2020-11-20 12:09:38,559 DEBUG   Thread-12 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): storage.googleapis.com:443
+2020-11-20 12:09:38,562 DEBUG   Thread-14 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): storage.googleapis.com:443
+2020-11-20 12:09:38,575 DEBUG   Thread-13 :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /graphql HTTP/1.1" 200 None
+2020-11-20 12:09:38,582 DEBUG   Thread-13 :36317 [connectionpool.py:_new_conn():815] Starting new HTTPS connection (1): storage.googleapis.com:443
+2020-11-20 12:09:38,585 DEBUG   Thread-5  :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /files/daphned/neural_networks_51/3sa8z4uc/file_stream HTTP/1.1" 200 None
+2020-11-20 12:09:38,677 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: poll_exit
+2020-11-20 12:09:38,735 DEBUG   Thread-5  :36317 [connectionpool.py:_make_request():396] https://api.wandb.ai:443 "POST /files/daphned/neural_networks_51/3sa8z4uc/file_stream HTTP/1.1" 200 None
+2020-11-20 12:09:38,739 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 7
+2020-11-20 12:09:38,739 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:38,739 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: poll_exit
+2020-11-20 12:09:38,739 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:38,739 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 7
+2020-11-20 12:09:38,740 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:38,740 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:38,740 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 7
+2020-11-20 12:09:38,740 INFO    SenderThread:36317 [sender.py:send_request_defer():221] send defer: 8
+2020-11-20 12:09:38,740 DEBUG   SenderThread:36317 [sender.py:send():90] send: final
+2020-11-20 12:09:38,740 DEBUG   SenderThread:36317 [sender.py:send():90] send: footer
+2020-11-20 12:09:38,741 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: defer
+2020-11-20 12:09:38,741 INFO    HandlerThread:36317 [handler.py:handle_request_defer():69] handle defer: 8
+2020-11-20 12:09:38,741 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:38,741 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: defer
+2020-11-20 12:09:38,741 INFO    SenderThread:36317 [sender.py:send_request_defer():185] handle sender defer: 8
+2020-11-20 12:09:40,089 DEBUG   Thread-14 :36317 [connectionpool.py:_make_request():396] https://storage.googleapis.com:443 "PUT /wandb-production.appspot.com/daphned/neural_networks_51/3sa8z4uc/config.yaml?Expires=1605960578&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=scLD3jz%2BzJ38QRMyf8sbB6SnnFOQbzMBBiRnWwsTJjpIzhvGPog5bjvBo1Yl9lZqbuPpLSSx7WC3ZWA1S101EsEnexoc3f%2BITXtBoKuxC1FH9vctYBr5MopHnyV5C6sjJFTHX7M1Av7VIZIluivcKFa7x0UsB2boosHhedmu%2BDrr9W8U6pEwd129D4frIyGE3I3r3DfWnZd76T1hXET%2BUEoWb61%2Foan%2FUrzjLPrwDJ6vqyrJLtgNhoYf2zsQZxrfoLBmFKPLy%2BsOE%2B0OLAv053dIMynEEbXBKSO0LOePLMhvZjByp9l9DmvlrUUiajetNUd3T50Q%2B4fYqzZ7z5xnCw%3D%3D HTTP/1.1" 200 0
+2020-11-20 12:09:40,089 DEBUG   Thread-15 :36317 [connectionpool.py:_make_request():396] https://storage.googleapis.com:443 "PUT /wandb-production.appspot.com/daphned/neural_networks_51/3sa8z4uc/wandb-summary.json?Expires=1605960578&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=mZYpFD9dmlxJj0YkpvS1AzrYoYuZm%2F74oc7lgjZgoEbTIoFeRouT5qjMo6s%2BvFUOy6%2FnZBlKRY07jobWVsh9oKpCFN6njzV%2FQgXtuVcKy9SMn854PzApr3PTTiQf9jg%2Fr3pVWrJoYKIgeZxX%2FlzJ9jJJQvTUBUtBp%2Fch0lb2B%2F4xwatqlwul3iUfHAtV7skvNoswXxJItaiJ%2BPIWBIJXh7CYiOYO7FuDJH%2BE6dL0CgK%2BohCALhY%2BQytFoQS3ZjcKyFqlekJq9Td07Q7HIlSw%2B3CkqmhG2CXw3Wu4aKo6FWMj7dW3VnnpfBSgV0Qj6K0qkq3sf%2BD7Uj33%2FXs7Eh%2F0aA%3D%3D HTTP/1.1" 200 0
+2020-11-20 12:09:40,090 DEBUG   Thread-12 :36317 [connectionpool.py:_make_request():396] https://storage.googleapis.com:443 "PUT /wandb-production.appspot.com/daphned/neural_networks_51/3sa8z4uc/requirements.txt?Expires=1605960578&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=q1a%2Bjj1vk83FDkGxMkBTR8H878hldN2ofbRC0FGkpoJd5F4I2myGg8duNX2wA7G8oNE5%2FmJp97mN%2BaVVZ6abCrI184xfrx7VuJtiiyGfTH7YIaxPhdhsx7xh8ak923e1u3W7hPoXl8zUF1TI9k%2BY0%2F6fX8zLbX1j2RLBL3IlhLGHZjTF53%2BNy5qQUIl1t6J2JkIPdgjfXJ2ncWP5CRKRp%2F6qMWjpYz%2FC4BCMZUphmD%2BrtDCRtLbf1sQor1n5JqIy3c90U2ngARXQFG8ZFa8%2BpPfqGo0ev9CFxFRSPxitF5kgv4h3WK7oUOAY3eA9umw8E1Yz%2Fadl6jv1iSKsQD9qrw%3D%3D HTTP/1.1" 200 0
+2020-11-20 12:09:40,090 DEBUG   Thread-13 :36317 [connectionpool.py:_make_request():396] https://storage.googleapis.com:443 "PUT /wandb-production.appspot.com/daphned/neural_networks_51/3sa8z4uc/output.log?Expires=1605960578&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=bZPme%2BuBACbFRlEM81EJZe4OfuO5qhdGKMPZK2F5Ror4sDiWKta8qz143ZGSvEYvmBFLPbFbdNhb%2Fyr%2FlghyEWlTviHARMuEdUxqJVjiVF6UiNnInhVu1c%2BpZRo%2F7aM2dW6gVqyTbJg66qzVNTEMPlzNYAtIyaf3K1OduWF5fH5bbz4WshTca4zeI2H4eTViAOgGgFGon131qE3sJBBfUGnPJs%2BwwKbJzn1d3arz6qVUWBidSb0z9Eh0fmAexEtYkXKV3h1nIHngOJHaT6oCEyaGAvS%2BVMGTgjmctg5DtPyMwq85hbcMjTI2Pk3wnDgTR2UtVTGmp2BHqV9AXy1UmA%3D%3D HTTP/1.1" 200 0
+2020-11-20 12:09:40,097 INFO    Thread-15 :36317 [upload_job.py:push():131] Uploaded file /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/wandb-summary.json
+2020-11-20 12:09:40,097 INFO    Thread-14 :36317 [upload_job.py:push():131] Uploaded file /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/config.yaml
+2020-11-20 12:09:40,101 INFO    Thread-13 :36317 [upload_job.py:push():131] Uploaded file /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/output.log
+2020-11-20 12:09:40,103 INFO    Thread-12 :36317 [upload_job.py:push():131] Uploaded file /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/files/requirements.txt
+2020-11-20 12:09:40,741 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: poll_exit
+2020-11-20 12:09:40,741 DEBUG   SenderThread:36317 [sender.py:send():90] send: request
+2020-11-20 12:09:40,741 DEBUG   SenderThread:36317 [sender.py:send_request():99] send_request: poll_exit
+2020-11-20 12:09:40,741 INFO    SenderThread:36317 [file_pusher.py:join():174] waiting for file pusher
+2020-11-20 12:09:40,743 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: get_summary
+2020-11-20 12:09:40,744 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: sampled_history
+2020-11-20 12:09:40,745 DEBUG   HandlerThread:36317 [handler.py:handle_request():55] handle_request: shutdown
+2020-11-20 12:09:40,746 INFO    HandlerThread:36317 [handler.py:finish():271] shutting down handler
+2020-11-20 12:09:41,744 INFO    SenderThread:36317 [sender.py:finish():642] shutting down sender
+2020-11-20 12:09:41,744 INFO    WriterThread:36317 [datastore.py:close():257] close: /Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51/wandb/run-20201120_120935-3sa8z4uc/run-3sa8z4uc.wandb
+2020-11-20 12:09:41,745 INFO    SenderThread:36317 [file_pusher.py:finish():169] shutting down file pusher
+2020-11-20 12:09:41,745 INFO    SenderThread:36317 [file_pusher.py:join():174] waiting for file pusher
+2020-11-20 12:09:41,746 INFO    MainThread:36317 [internal.py:handle_exit():138] Internal process exited

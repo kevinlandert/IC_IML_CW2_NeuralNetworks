@@ -1,0 +1,22 @@
+{
+    "os": "Darwin-19.6.0-x86_64-i386-64bit",
+    "python": "3.7.1",
+    "heartbeatAt": "2020-11-20T12:09:36.393872",
+    "startedAt": "2020-11-20T12:09:35.271854",
+    "docker": null,
+    "cpu_count": 4,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "codePath": "part2_house_value_regression.py",
+    "program": "part2_house_value_regression.py",
+    "git": {
+        "remote": "https://gitlab.doc.ic.ac.uk/lab2021_autumn/neural_networks_51.git",
+        "commit": "e557753ad10116a64e590ee6a5c37f0d69c18850"
+    },
+    "email": "zcahdde@ucl.ac.uk",
+    "root": "/Users/daphnedemekas/Desktop/Imperial/IntrotoML/neural_networks_51",
+    "host": "Daphnes-MacBook-Pro-2.local",
+    "username": "daphnedemekas",
+    "executable": "/Library/Frameworks/Python.framework/Versions/3.7/bin/python3"
+}

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "part2_house_value_regression.py", line 526, in <module>
+    example_main()
+  File "part2_house_value_regression.py", line 462, in example_main
+    regressor = Regressor(x_train)
+  File "part2_house_value_regression.py", line 60, in __init__
+    self.nb_epoch = config.nb_epoch
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/wandb/sdk/wandb_config.py", line 145, in __getattr__
+    return self.__getitem__(key)
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/wandb/sdk/wandb_config.py", line 127, in __getitem__
+    return self._items[key]
+KeyError: 'nb_epoch'

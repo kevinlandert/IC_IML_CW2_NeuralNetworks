@@ -15,11 +15,22 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error,explained_variance_score,r2_score
 
 from matplotlib import pyplot as plt
-        
+
+import wandb
+#from wandb.keras import WandbCallback
+
+hyperparameter_defaults = {
+    "dropout" : 0.5, 
+    "nb_epochs": 1000,
+    "batch_size": 64,
+    "folds": 10,
+    "out_features" : 100,
+    "lr" : 0.001
+}    
 
 class Regressor():
 
-    def __init__(self, x, nb_epoch = 1000):
+    def __init__(self, x, config):
         # You can add any input parameters you need
         # Remember to set them with a default value for LabTS tests
         """ 
@@ -42,18 +53,21 @@ class Regressor():
         self.X = X
         self.input_size = X.shape[1]
         self.output_size = 1
-        self.nb_epoch = nb_epoch 
-        self.batch_size = 64
+        self.nb_epoch = config.nb_epoch 
+        self.batch_size = config.batch_size
         self.running_loss = 0
-        self.folds = 10
+        self.folds = config.folds
         
         #Networkk -> Adjust structure at the bottom
         self.network = Network(input_dim = self.input_size,output_dim = self.output_size)
+        wandb.watch(self.network)
+
+        self.criterion = nn.MSELoss()
         
         #Optimizer
         #self.optimizer = optim.SGD(self.network.parameters(), lr = 0.01)
         #self.optimizer = optim.Adagrad(self.network.parameters(), lr=0.01, lr_decay=0, weight_decay=0.01, initial_accumulator_value=0, eps=1e-10)
-        self.optimizer = optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+        self.optimizer = optim.Adam(self.network.parameters(), lr=config.lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
         
         
         
@@ -230,7 +244,7 @@ class Regressor():
                     
                     #Compute Loss
 
-                    loss = nn.MSELoss()(prediction,batch_y)
+                    loss = self.criterion(prediction,batch_y)
                     
                     #Backward prop
                     self.optimizer.zero_grad()
@@ -403,13 +417,26 @@ def RegressorHyperParameterSearch():
     #######################################################################
     #                       ** START OF YOUR CODE **
     #######################################################################
-
+    
+    # define the parameters
     return  # Return the chosen hyper parameters
 
     #######################################################################
     #                       ** END OF YOUR CODE **
     #######################################################################
 
+
+hyperparameter_defaults = {
+    "dropout" : 0.5, 
+    "nb_epoch": 1000,
+    "batch_size": 64,
+    "folds": 10,
+    "out_features" : 100,
+    "lr" : 0.001
+}
+
+wandb.init(config = hyperparameter_defaults, project = "neural_networks_51")
+config = wandb.config 
 
 
 def example_main():
@@ -440,13 +467,21 @@ def example_main():
     y_test = y_train[:2000]
     
     
-    regressor = Regressor(x_train, nb_epoch = 1000)
+    regressor = Regressor(x_train, config)
     regressor.fit(x_train, y_train)
     save_regressor(regressor)
 
+    training_loss = regressor.loss_rel[0,0,:]
+    validation_loss = regressor.loss_rel[1,0,:]
+    error = regressor.score(x_test, y_test)
+
+    metrics = {'training_loss':training_loss, 'validation_loss': validation_loss, 'error':error}
+    wandb.log(metrics)
+
+
     #Plots our training and validation loss
-    plt.plot(np.arange(regressor.loss_rel.shape[2]),regressor.loss_rel[0,0,:],label = 'training_loss')
-    plt.plot(np.arange(regressor.loss_rel.shape[2]),regressor.loss_rel[1,0,:],label = 'validation_loss')
+    plt.plot(np.arange(regressor.loss_rel.shape[2]),training_loss,label = 'training_loss')
+    plt.plot(np.arange(regressor.loss_rel.shape[2]),validation_loss,label = 'validation_loss')
     plt.yscale("log")
     plt.legend()
     plt.show()
@@ -461,24 +496,34 @@ def example_main():
     
 
     # Error
-    error = regressor.score(x_test, y_test)
     print("\nRegressor error: {}\n".format(error))
 
-    
+
+
 class Network(nn.Module):
     
     def __init__(self,input_dim,output_dim):
         
         super(Network,self).__init__()
+
+        #can make the outfeatures different for each layer 
         
-        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 100)
-        self.layer_2 = nn.Linear(in_features = 100, out_features = 100)
-        self.layer_3 = nn.Linear(in_features = 100, out_features = 100)
+        self.layer_1 = nn.Linear(in_features = input_dim, out_features = config.out_features)
+        
+        self.layer_2 = nn.Linear(in_features = 100, out_features = config.out_features)
+
+        self.layer_3 = nn.Linear(in_features = 100, out_features = config.out_features)
+
+        self.dropout = nn.Dropout(p = config.dropout)
+
         self.output_layer = torch.nn.Linear(in_features=100, out_features=output_dim)
         
+
     def forward(self,input):
         
+        #output = self.layer_1(input)
         layer_1_output = torch.nn.functional.relu(self.layer_1(input))
+
         layer_2_output = torch.nn.functional.relu(self.layer_2(layer_1_output))
         layer_3_output = torch.nn.functional.relu(self.layer_3(layer_2_output))
         output = self.output_layer(layer_3_output)

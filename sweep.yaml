@@ -1,0 +1,21 @@
+program: part2_house_value_regression.py
+method: bayes
+metric:
+  name: validation_loss
+  goal: minimize
+parameters:
+  lr: 
+    min: 0.0005
+    max: 0.1
+  dropout:
+    min: 0.1
+    max: 0.7
+  nb_epochs:
+    min: 1000
+    max: 10000
+  folds:
+    min: 5
+    max: 15
+  out_features:
+    min: 50
+    max: 200
