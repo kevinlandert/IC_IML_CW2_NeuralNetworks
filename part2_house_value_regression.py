@@ -46,7 +46,7 @@ class Regressor():
         self.input_size = X.shape[1]
         self.output_size = 1
         self.nb_epoch = nb_epoch 
-        self.batch_size = 64
+        self.batch_size = 128
         self.running_loss = 0
         self.folds = 10
         
@@ -107,29 +107,41 @@ class Regressor():
         categorical_features = ['ocean_proximity']
         
         features = x[column_names]
+        
+        
+        #If training data is missing ISLAND column because not represented, we have to add it manually
+        features = pd.get_dummies(features)
+        if 'ocean_proximity_ISLAND' not in features.columns.values:
+            features['ocean_proximity_ISLAND'] = 0
+        
+        #Drop one column due to dummies function: 'ocean_proximity_NEAR OCEAN'
+        features = features[['longitude', 'latitude', 'housing_median_age', 'total_rooms',
+       'total_bedrooms', 'population', 'households', 'median_income',
+       'ocean_proximity_<1H OCEAN', 'ocean_proximity_INLAND',
+       'ocean_proximity_ISLAND', 'ocean_proximity_NEAR BAY']]
+        
         outputs = y
         
         #Potentially do this with model saving
-        #If we've seen no data before fit preprocessors
+        #If we've seen no data before fit preprocessors        
+        
         if(training):
             
+            #Transformer for the numeric columns
             numeric_transformer = Pipeline(steps = [
                 ('imputer', SimpleImputer(strategy = 'median')),
                 ('scaler', StandardScaler())
             ])
             
-            categorical_transformer = Pipeline(steps = [
-                ('ordinal', OneHotEncoder(sparse=False)),
-                ('scaler',StandardScaler())
-            ])
-            
+            #Transform numeric, passthrough others
             ct = ColumnTransformer(
                 transformers = [
                     ('num', numeric_transformer, numeric_features),
-                    ('cat',categorical_transformer,categorical_features)
-                ])
+                ],remainder = 'passthrough')
             
+            #Processed data
             df_processed = ct.fit_transform(X = features)
+            
             
             #Save Transfomer"
             dump(ct, open("x_transformer.pkl","wb"))
@@ -514,17 +526,20 @@ class Network(nn.Module):
         
         super(Network,self).__init__()
         
-        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 100)
-        self.layer_2 = nn.Linear(in_features = 100, out_features = 100)
-        self.layer_3 = nn.Linear(in_features = 100, out_features = 100)
-        self.output_layer = torch.nn.Linear(in_features=100, out_features=output_dim)
+        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 128)
+        self.layer_2 = nn.Linear(in_features = 128, out_features = 128)
+        self.layer_3 = nn.Linear(in_features = 128, out_features = 128)
+        self.layer_4 = nn.Linear(in_features = 128, out_features = 128)
+        self.output_layer = torch.nn.Linear(in_features=128, out_features=output_dim)
         
     def forward(self,input):
         
         layer_1_output = torch.nn.functional.relu(self.layer_1(input))
         layer_2_output = torch.nn.functional.relu(self.layer_2(layer_1_output))
         layer_3_output = torch.nn.functional.relu(self.layer_3(layer_2_output))
-        output = self.output_layer(layer_3_output)
+        layer_4_output = torch.nn.functional.relu(self.layer_4(layer_3_output))
+
+        output = self.output_layer(layer_4_output)
         return output    
     
 
