@@ -120,7 +120,9 @@ class SigmoidLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #store the input in the cache to later use in backward pass
         self._cache_current = x
+        #return x passed through the sigmoid function
         return 1/(1+np.exp(-x))
 
         #######################################################################
@@ -144,11 +146,15 @@ class SigmoidLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #retrieve input from the cache
         x = self._cache_current
+        #compute sigmoid derivative of output of previous linear layer (input of activation function)
         sigmoid_derivative = np.exp(-x)/(1+np.exp(-x))**2
         
+        #check whether same shape
         assert grad_z.shape == sigmoid_derivative.shape
         
+        #do element wise multiplication of gradient wrt to output of activation function and sigmoid derivative 
         return np.multiply(grad_z, sigmoid_derivative)
 
         #######################################################################
@@ -183,7 +189,9 @@ class ReluLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #store the input in the cache to later use in backward pass
         self._cache_current = x
+        #return x passed through the relu function
         return np.maximum(0,x)
 
         #######################################################################
@@ -207,11 +215,15 @@ class ReluLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #retrieve input from the cache
         x = self._cache_current
+        #compute relu derivative of output of previous linear layer (input of activation function)
         relu_derivative = (x > 0) * 1
         
+        #check whether same shape
         assert grad_z.shape == relu_derivative.shape
         
+        #do element wise multiplication of gradient wrt to output of activation function and relu derivative 
         return np.multiply(grad_z, relu_derivative)
 
         #######################################################################
@@ -238,7 +250,9 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        # initialize weights of linear layer with Xavier Glorot initialization (gain of 1)
         self._W = xavier_init((self.n_in, self.n_out), 1.0)
+        # initialize biases with zeros, because we don’t want the neurons to start out with a bias
         self._b = np.zeros((1,self.n_out))
 
         self._cache_current = None
@@ -265,9 +279,15 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        assert (x.shape[1] == self._W.shape[0])
-        z = x @ self._W + np.repeat(self._b,x.shape[0],axis=0)
+        #retrieve input from the cache
         self._cache_current = x
+        
+        #check whether same shape
+        assert (x.shape[1] == self._W.shape[0])
+        
+        # calculate output of linear layer and return
+        z = x @ self._W + np.repeat(self._b,x.shape[0],axis=0)
+        
         return z
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -290,11 +310,16 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        assert (np.transpose(self._cache_current).shape[1] == grad_z[0]) & (np.ones((1,self._cache_current.shape[0])).shape[1] == grad_z[0]) & (grad_z.shape[1] == np.transpose(self._W).shape[0])
+        # check whether same shape and multiplications can be performed
         
+        assert (np.transpose(self._cache_current).shape[1] == grad_z.shape[0]) & (np.ones((1,self._cache_current.shape[0])).shape[1] == grad_z.shape[0]) & (grad_z.shape[1] == np.transpose(self._W).shape[0])
+        
+        # calculate loss gradient wrt to weights: input_transpose * grad_z
         self._grad_W_current = np.transpose(self._cache_current) @ grad_z
+        # calculate loss gradient wrt to bias: column vector of ones * grad_z
         self._grad_b_current = np.ones((1,self._cache_current.shape[0])) @ grad_z
         
+        #return gradient with respect to the inputs of the layer: grad_z * w_transpose
         return grad_z @ np.transpose(self._W)
 
         #######################################################################
@@ -312,6 +337,7 @@ class LinearLayer(Layer):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #update weights and biases 
         self._W += - learning_rate * self._grad_W_current
         self._b += - learning_rate * self._grad_b_current
 
@@ -346,7 +372,7 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
-        self._layers = None
+        #stack all layers in one ndarray 
         layers = np.ndarray((len(self.neurons)*2),dtype=np.object)
         n_in = self.input_dim
         for i in range(len(self.neurons)):
@@ -380,8 +406,10 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #pass through all layers
         z_temp = x
         for i in range(len(self._layers)):
+            #check whether identity layer and no activation function should be called
             if not self._layers[i] == 'identity':
                 z_temp = self._layers[i].forward(z_temp)
         return z_temp 
@@ -408,8 +436,10 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #backwards pass through all layers
         grad_z_temp = grad_z
         for i in range(len(self._layers)-1,-1,-1):
+            #check whether identity layer and no activation function should be called
             if not self._layers[i] == 'identity':
                 grad_z_temp = self._layers[i].backward(grad_z_temp)
         return grad_z_temp
@@ -428,7 +458,9 @@ class MultiLayerNetwork(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #update all weights and biases in the individual layers
         for i in range(len(self._layers)):
+            #check that only linear layers are called
             if isinstance(self._layers[i], LinearLayer):
                 self._layers[i].update_params(learning_rate)
         #######################################################################
@@ -517,6 +549,7 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #randomly shuffle indices and use shuffled indices to get shuffled dataset (both input and target)
         idx_list = np.arange(len(input_dataset))
         np.random.shuffle(idx_list)
         shuffled_inputs  = input_dataset[idx_list]
@@ -549,12 +582,16 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #loop over number of epochs
         for i in range(self.nb_epoch):
+            #check whether data should be shuffled
             if self.shuffle_flag == True:
                 input_dataset, target_dataset = self.shuffle(input_dataset, target_dataset)
+            #Splits the dataset into batches of size batch_size
             input_batches = [input_dataset[i:i + self.batch_size] for i in range(0, len(input_dataset), self.batch_size)]  
             target_batches = [target_dataset[i:i + self.batch_size] for i in range(0, len(target_dataset), self.batch_size)] 
             
+            #loop over batches
             for i in range(len(input_batches)):
                 y_pred = self.network(input_batches[i])
                 self._loss_layer.forward(y_pred, target_batches[i])
@@ -579,6 +616,7 @@ class Trainer(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #get current target prediction and return calculated loss (with target data)
         y_pred = self.network(input_dataset)
         return self._loss_layer.forward(y_pred, target_dataset)
         #######################################################################
@@ -604,6 +642,7 @@ class Preprocessor(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #find maximum and minimum in data and set a and b according to range [0,1]
         self.maximum = np.amax(data, axis = 0)
         self.minimum = np.amin(data, axis = 0)
         self.a = np.ones(data.shape[1])
@@ -626,6 +665,7 @@ class Preprocessor(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #perform min max normalization : Scaling the smallest value to a and largest value to b
         normalized_data = self.a + (data - self.minimum) * (self.b-self.a) / (self.maximum - self.minimum)
         return normalized_data
         #######################################################################
@@ -645,6 +685,7 @@ class Preprocessor(object):
         #######################################################################
         #                       ** START OF YOUR CODE **
         #######################################################################
+        #revert min max normalization : Scaling a to smallest value and b to largest value
         reverted_data = (data - self.a) * (self.maximum - self.minimum) / (self.b-self.a) + self.minimum 
         return reverted_data
 
