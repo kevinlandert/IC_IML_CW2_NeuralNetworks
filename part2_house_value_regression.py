@@ -8,6 +8,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler,OrdinalEncoder,MinMaxScaler
 from pickle import dump, load
 from sklearn.model_selection import KFold
@@ -115,7 +116,7 @@ class Regressor():
             ])
             
             categorical_transformer = Pipeline(steps = [
-                ('ordinal', OrdinalEncoder()),
+                ('ordinal', OneHotEncoder(sparse=False)),
                 ('scaler',StandardScaler())
             ])
             
