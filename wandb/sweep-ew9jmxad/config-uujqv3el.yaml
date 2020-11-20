@@ -1,0 +1,12 @@
+wandb_version: 1
+
+dropout:
+  value: 0.12495961439714341
+folds:
+  value: 6
+lr:
+  value: 0.05360412154391239
+nb_epochs:
+  value: 1000
+out_features:
+  value: 78
