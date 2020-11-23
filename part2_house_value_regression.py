@@ -13,6 +13,9 @@ from sklearn.preprocessing import StandardScaler,OrdinalEncoder,MinMaxScaler
 from pickle import dump, load
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error,explained_variance_score,r2_score
+from sklearn.model_selection import train_test_split
+import warnings
+warnings.simplefilter('error', RuntimeWarning)
 
 #from skorch import NeuralNetRegressor
 #from sklearn.model_selection import GridSearchCV
@@ -22,7 +25,7 @@ from matplotlib import pyplot as plt
 
 class Regressor():
 
-    def __init__(self, x, nb_epoch = 1000):
+    def __init__(self, x, nb_epoch = 1000,lr = 0.001,wd = 0):
         # You can add any input parameters you need
         # Remember to set them with a default value for LabTS tests
         """ 
@@ -49,14 +52,15 @@ class Regressor():
         self.batch_size = 128
         self.running_loss = 0
         self.folds = 10
+        self.lr = lr
+        self.early_stopping = True
+        self.weight_decay = wd
         
         #Networkk -> Adjust structure at the bottom
         self.network = Network(input_dim = self.input_size,output_dim = self.output_size)
         
         #Optimizer
-        #self.optimizer = optim.SGD(self.network.parameters(), lr = 0.01)
-        #self.optimizer = optim.Adagrad(self.network.parameters(), lr=0.01, lr_decay=0, weight_decay=0.01, initial_accumulator_value=0, eps=1e-10)
-        self.optimizer = optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+        self.optimizer = optim.Adam(self.network.parameters(), lr=self.lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=self.weight_decay, amsgrad=False)
         
         
         
@@ -204,88 +208,103 @@ class Regressor():
         #Saves losses
         #[0,fold,epoch] -> for training losses
         #[1,fold,epoch] -> for validation losses
-        rel_losses = np.zeros((2,self.folds,self.nb_epoch))
-        abs_losses= np.zeros((2,self.folds,self.nb_epoch))
+        rel_losses = np.zeros((2,self.nb_epoch))
+        abs_losses= np.zeros((2,self.nb_epoch))
         
-        #10 fold crossvalidation with 9 for training 1 for validation
-        kfold = KFold(n_splits = self.folds)
-        folds = kfold.split(np.arange(X.shape[0]))
-        
-        for fold, (train_index,val_index) in enumerate(folds):
+        #Randomly splits into 90% train and 10% val 
+        train_index,val_index = train_test_split(np.arange(X.shape[0]),train_size = 0.9)
 
-            #Data to train
-            x_train = X[train_index].detach()
-            y_train = Y[train_index].detach()
-            
-            #Data to evaluate
-            x_val = X[val_index].detach()
-            y_val = Y[val_index].detach()
-            
-            #To do batching on training data
-            torch_dataset_train = data.TensorDataset(x_train,y_train)
-            data_loader_train = data.DataLoader(dataset = torch_dataset_train,batch_size = self.batch_size,shuffle = True)
-            
-            #To do batching on validation data -> for later
-            #torch_dataset_val = data.TensorDataset(x_val,y_val)
-            #data_loader_val = data.DataLoader(dataset = torch_dataset_val,batch_size = self.batch_size, shuffle = False)
-            
+        #Data to train
+        x_train = X[train_index].detach()
+        y_train = Y[train_index].detach()
         
-            for epoch in range(self.nb_epoch):
+        #Data to evaluate
+        x_val = X[val_index].detach()
+        y_val = Y[val_index].detach()
+        
+        #To do batching on training data
+        torch_dataset_train = data.TensorDataset(x_train,y_train)
+        data_loader_train = data.DataLoader(dataset = torch_dataset_train,batch_size = self.batch_size,shuffle = True)
+        
+        #We do early stopping if moving average validation loss over N episodes increases
+        N = 20
+        cumsum, moving_averages = [0],[]
+        old_average = np.inf
+        
+        
+        for epoch in range(self.nb_epoch):
+        
             
+            #Set network to training mode
+            self.network.train()
+            
+            #Batching in every epoch
+            for step, (batch_x, batch_y) in enumerate(data_loader_train):
+            
+            
+                #Forward prop
+                prediction = self.network(batch_x)
                 
-                #Set network to training mode
-                self.network.train()
-                
-                #Batching in every epoch
-                for step, (batch_x, batch_y) in enumerate(data_loader_train):
-                
-                
-                    #Forward prop
-                    prediction = self.network(batch_x)
-                    
-                    #Compute Loss
+                #Compute Loss
 
-                    loss = nn.MSELoss()(prediction,batch_y)
-                    
-                    #Backward prop
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    
-                    #Update parameters
-                    self.optimizer.step()
+                loss = nn.MSELoss()(prediction,batch_y)
+                
+                #Backward prop
+                self.optimizer.zero_grad()
+                loss.backward()
+                
+                #Update parameters
+                self.optimizer.step()
         
         
-                #Evaluate after every epoch
-                self.network.eval()
+            #Evaluate after every epoch
+            self.network.eval()
+            
+            #Compute total loss on training data
+            prediction = self.network.forward(x_train).detach()
+            #Absolute training loss
+            train_loss_abs = nn.MSELoss()(prediction,y_train)
+            abs_losses[0,epoch] = train_loss_abs
+            #Relative training loss
+            train_loss_rel = torch.sum(torch.div(torch.abs(torch.sub(prediction,y_train)),y_train)) / y_train.shape[0]
+            rel_losses[0,epoch] = train_loss_rel
+
+            
+            #Compute total loss on validation data
+            prediction = self.network.forward(x_val).detach()
+            #Absolute validation loss
+            val_loss_abs = nn.MSELoss()(prediction,y_val)
+            abs_losses[1,epoch] = val_loss_abs
+            #Relative validation loss
+            val_loss_rel = torch.sum(torch.div(torch.abs(torch.sub(prediction,y_val)),y_val)) / y_val.shape[0]
+            rel_losses[1,epoch] = val_loss_rel
+              
+                             
+            #Print losses every 20 folds               
+            if ((epoch % 20) == 0):
+                print("Episode: {}\t - Training Loss:  {}\t - Validation Loss: {}".format(epoch,train_loss_rel,val_loss_rel))   
                 
-                #Compute total loss on training data
-                prediction = self.network.forward(x_train).detach()
-                train_loss_abs = nn.MSELoss()(prediction,y_train)
-                abs_losses[0,fold,epoch] = train_loss_abs
-                
-                #Average relative distance from true value
-                train_loss_rel = torch.sum(torch.div(torch.abs(torch.sub(prediction,y_train)),y_train)) / y_train.shape[0]
-                rel_losses[0,fold,epoch] = train_loss_rel
                 
                 
-                #Compute total loss on validation data
-                prediction = self.network.forward(x_val).detach()
-                val_loss_abs = nn.MSELoss()(prediction,y_val)
-                abs_losses[1,fold,epoch] = val_loss_abs
+            #Compute moving average of last N losses
+            cumsum.append(cumsum[epoch - 1] + val_loss_abs.numpy())  
+            if epoch >= N:
+                moving_average = (cumsum[epoch] - cumsum[epoch - N]) / N
+                moving_averages.append(moving_average)
+ 
+                #If moving average rising, stop -> not optimal yet
+                if (moving_average > old_average):
+                    print("Episode: {}\t - Training Loss:  {}\t - Validation Loss: {}".format(epoch,train_loss_rel,val_loss_rel)) 
+                    print("Average Validation Loss rising -> break")
+                    if self.early_stopping:
+                        break
+                else:
+                    old_average = moving_average
                 
-                val_loss_rel = torch.sum(torch.div(torch.abs(torch.sub(prediction,y_val)),y_val)) / y_val.shape[0]
-                rel_losses[1,fold,epoch] = val_loss_rel
-                
-                
-                #Print losses every 20 folds               
-                if ((epoch % 20) == 0) & (epoch != 0):
-                    print("Fold: {}\t - Episode: {}\t - Training Loss:  {}\t - Validation Loss: {}".format(fold,epoch,train_loss_rel,val_loss_rel))
-                
-            #Just one fold for now 
-            break
         
         self.loss_abs = abs_losses
         self.loss_rel = rel_losses
+        
         
         return self
     
@@ -358,9 +377,9 @@ class Regressor():
         ex_var = explained_variance_score(prediction,Y)
         r2 = r2_score(prediction,Y)
         
-        print(mse)
-        print(ex_var)
-        print(r2)
+        #print(mse)
+        #print(ex_var)
+        #print(r2)
         
         
         
@@ -372,7 +391,7 @@ class Regressor():
         
         
         
-        return mean_squared_error(prediction,Y) # Replace this code with your own
+        return mse,ex_var,r2 # Replace this code with your own
 
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -401,7 +420,7 @@ def load_regressor():
 
 
 
-def RegressorHyperParameterSearch(): 
+def RegressorHyperParameterSearch(x,y,folds = 5): 
     # Ensure to add whatever inputs you deem necessary to this function
     """
     Performs a hyper-parameter for fine-tuning the regressor implemented 
@@ -417,47 +436,71 @@ def RegressorHyperParameterSearch():
 
     #######################################################################
     #                       ** START OF YOUR CODE **
-    #######################################################################
-    data = pd.read_csv("housing.csv") 
-    
+    #######################################################################    
     #Randomly shuffle the data
-    data = data.sample(frac = 1).reset_index(drop = True)
-    x = data.loc[:, data.columns != output_label]
-    y = data.loc[:, [output_label]]
     
-    X, Y = self._preprocessor(x, y = y, training = False)
+    #Testing epochs makes no sense as we're doing early stopping:
+    #TODO:
+    # 1. Test different numbers of layers and layer size -> see network init function
+    # 2. Add dropout layers
     
-    """ Does not work because we cannot use scorch
-    net = NeuralNetRegressor(Network
-                         , max_epochs=100
-                         , optimizer=optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
-                         , lr=0.001
-                         , verbose=1)
     
     params = {
     'lr': [0.001,0.005, 0.01, 0.05, 0.1, 0.2, 0.3],
-    'max_epochs': list(range(500,5500, 500))
-    }
+    'max_epochs': list(range(500,5500,500))}
     
-    gs = GridSearchCV(net, params, refit=False, scoring='r2', verbose=1, cv=10)
+    #initialize our return values
+    num_folds = 5
+    min_error = 1e7
+    best_lr = 0
+    best_epoch = 0
+        
     
-    gs.fit(X,Y)
-    """
-    
-    
-    
-    
-    
-    
+    kfold = KFold(n_splits = num_folds)
+    folds = list(kfold.split(np.arange(x.shape[0])))
     
     
+    for learning_rate in params['lr']:
+        
+        print("training on learning rate " + str(learning_rate))
+        
+        for epoch in params['max_epochs']:
+            
+            print("training on epoch " + str(epoch))
+            
+            average_errors = []
+            
+            for fold, (train_index, val_index) in enumerate(folds):
+            
+                
+                x_train = x.iloc[train_index]
+                y_train = y.iloc[train_index]
+                
+                x_val = x.iloc[val_index]
+                y_val = y.iloc[val_index]
+    
+                #Can give network shape as input here
+                regressor = Regressor(x_train, nb_epoch = epoch, lr = learning_rate)
+                regressor.fit(x_train, y_train)
+    
+                mse,ex_var,r2 = regressor.score(x_val, y_val)
+        
+                fold_error = mse
+    
+                average_errors.append(fold_error)
+             
+            
+            average_error = np.average(average_errors)
+    
+            if average_error < min_error:
+            
+                min_error = average_error 
+                best_lr = learning_rate
+                best_epoch = epoch
     
     
     
-    
-    
-    
-    return  # Return the chosen hyper parameters
+    return  best_lr,best_epoch# Return the chosen hyper parameters
 
     #######################################################################
     #                       ** END OF YOUR CODE **
@@ -498,8 +541,8 @@ def example_main():
     save_regressor(regressor)
 
     #Plots our training and validation loss
-    plt.plot(np.arange(regressor.loss_rel.shape[2]),regressor.loss_rel[0,0,:],label = 'training_loss')
-    plt.plot(np.arange(regressor.loss_rel.shape[2]),regressor.loss_rel[1,0,:],label = 'validation_loss')
+    plt.plot(np.arange(regressor.loss_rel.shape[1]),regressor.loss_rel[0,:],label = 'training_loss')
+    plt.plot(np.arange(regressor.loss_rel.shape[1]),regressor.loss_rel[1,:],label = 'validation_loss')
     plt.yscale("log")
     plt.legend()
     plt.show()
@@ -517,37 +560,79 @@ def example_main():
     error = regressor.score(x_test, y_test)
     print("\nRegressor error: {}\n".format(error))
 
+def main_hyperparameter_search():
+    
+    output_label = "median_house_value"
 
+    data = pd.read_csv("housing.csv") 
+    data = data.sample(frac = 1).reset_index(drop = True)
+    x = data.loc[:, data.columns != output_label]
+    y = data.loc[:, [output_label]]
+    
+    
+    x_train = x[2000:].reset_index(drop = True)
+    y_train = y[2000:].reset_index(drop = True)
+    x_test = x_train[0:2000].reset_index(drop = True)
+    y_test = y_train[:2000].reset_index(drop = True)
+    
+    parameters = RegressorHyperParameterSearch(x_train,y_train)
+    
+    lr,epoch = parameters
+    
+    regressor = Regressor(x_train, nb_epoch = epoch, lr = lr)
+    regressor.fit(x_train, y_train)
+    
+    pred = regressor.predict(x_test)
+
+    # Error
+    error = regressor.score(x_test, y_test)
+    print("\nRegressor error: {}\n".format(error))
+    
+    
         
     
 class Network(nn.Module):
     
-    def __init__(self,input_dim,output_dim):
+    def __init__(self,input_dim,output_dim, neurons = [128,128,128,128,1],activations = ['relu','relu','relu','relu,','identity']):
         
         super(Network,self).__init__()
         
-        self.layer_1 = nn.Linear(in_features = input_dim,out_features = 128)
-        self.layer_2 = nn.Linear(in_features = 128, out_features = 128)
-        self.layer_3 = nn.Linear(in_features = 128, out_features = 128)
-        self.layer_4 = nn.Linear(in_features = 128, out_features = 128)
-        self.output_layer = torch.nn.Linear(in_features=128, out_features=output_dim)
+        
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.neurons = neurons
+        self.activations = activations
+        
+        
+        self._layers = nn.ModuleList()
+    
+        n_in = self.input_dim
+
+        for i in range(len(self.neurons)):
+            
+            self._layers.append(nn.Linear(in_features = n_in,out_features = self.neurons[i]))
+            n_in = self.neurons[i]
+
         
     def forward(self,input):
         
-        layer_1_output = torch.nn.functional.relu(self.layer_1(input))
-        layer_2_output = torch.nn.functional.relu(self.layer_2(layer_1_output))
-        layer_3_output = torch.nn.functional.relu(self.layer_3(layer_2_output))
-        layer_4_output = torch.nn.functional.relu(self.layer_4(layer_3_output))
-
-        output = self.output_layer(layer_4_output)
-        return output    
-    
+        outputs = input
+        
+        for i in range(len(self.activations)):
+            if (self.activations[i] == 'relu'):
+                outputs = torch.nn.functional.relu(self._layers[i](outputs))
+            elif (self.activations[i] == 'sigmoid'):
+                outputs = torch.nn.functional.sigmoid(self._layers[i](outputs))
+            elif (self.activations[i] == 'identity'):
+                outputs = self._layers[i](outputs)
+         
+        return outputs
 
 if __name__ == "__main__":
     
     
-    example_main()
-    
+    #example_main()
+    main_hyperparameter_search()
 
         
        
