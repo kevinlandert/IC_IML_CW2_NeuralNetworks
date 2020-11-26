@@ -13,6 +13,8 @@ This project contains the Introduction to Machine Learning Coursework 2 Neural N
     * _part2_house_value_regression.py_: contains the implementation of a neural network architecture to predict the median house price in California
     * _housing.csv_: California Housing Dataset 
 
+* Additionally, we have included in **jupyter_lab** notebooks to run the models and in **data_analysis** functions used in the report for plotting and in **legacy** legacy functions. 
+
 ## Requirements
 IML_Artificial_Neural_Networks requires the following to run: 
 * ```Python3```
