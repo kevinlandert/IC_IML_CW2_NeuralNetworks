@@ -25,7 +25,7 @@ IML_Artificial_Neural_Networks requires the following to run:
 
 * **PART1** can be run via the command line ```python3 part1_nn_library.py``` . 
     * The Code is then tested on the _IRIS.dat_ dataset using Relu activation function
-    * This returns the predictions, as well as the training and validation loss and the accuracy of the Network Architecture
+    * This returns the predictions, as well as the training and validation loss and the accuracy based on a test data split from the IRIS dataset.
     * Please make sure that the _IRIS.dat_ for testing is in the same folder as the file 
 * **PART2** can be run via the command line ```python3 part2_house_value_regression.py``` .
     * This runs the main algorithm and returns the predicted median house value 
@@ -33,7 +33,7 @@ IML_Artificial_Neural_Networks requires the following to run:
     * Please make sure that the _housing.csv_ for training is in the same folder as the file 
     * To **test** part2 with another file:
         1. Upload new housing dataset in the same folder
-        2. Changing the path to the new dataset in ```main.py```
+        2. In the _example_main() function upload the test set
 ## Credit
 Daphne Demekas, Nasma Dasser, Constantin Eulenstein and Kevin Landert
 
