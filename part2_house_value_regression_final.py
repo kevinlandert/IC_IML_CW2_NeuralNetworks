@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 
 class Regressor():
 
-    def __init__(self, x, nb_epoch = 100,lr = 0.001,wd = 0, batch_size = 28):
+    def __init__(self, x, nb_epoch = 100,lr = 0.002,wd = 0, batch_size = 56):
         # You can add any input parameters you need
         # Remember to set them with a default value for LabTS tests
         """ 
@@ -523,7 +523,7 @@ def RegressorHyperParameterSearch(x,y,folds = 5):
 # PLOTTING FUNCTIONS
 def plot_validation_loss(training_loss, validation_loss):
 
-    title = 'Loss with  Batch Size = 128 and Learning rate = 0.001'
+    title = 'Loss with  Batch Size = 56 and Learning rate = 0.002'
     fig = plt.figure()
     plt.plot(training_loss, label ='Training Loss', color='mediumblue')
     plt.plot(validation_loss, label = 'Validation Loss', color= 'darkorange')
