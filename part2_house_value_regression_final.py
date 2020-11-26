@@ -580,13 +580,8 @@ def example_main():
                        validation_loss =regressor.loss_rel[1,:] )
     
     # --------------------------------------------------------------------
-    # TEST & PREDICT
-    output_label = "median_house_value"
-    test = pd.read_csv('housing_test.csv',index_col=0)
-    whole_test = test.loc[:, test.columns != output_label]
-    whole_test = whole_test.loc[:, whole_test.columns != '_merge']
-    
-    pred = regressor.predict(whole_test)
+    # TEST & PREDICT    
+    pred = regressor.predict(x_test)
     
     scaler = load(open('y_transformer.pkl', 'rb'))
  
