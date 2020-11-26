@@ -9,14 +9,14 @@ This project contains the Introduction to Machine Learning Coursework 2 Neural N
 * **PART1**: 
     * **_part1_nn_library.py_**: contains the implementation of a modular multi-layer neural network library 
 * **PART2**:
-    * _part2_house_value_regression.py_: contains the implementation of a neural network architecture to predict the median house price in California
+    * ** _part2_house_value_regression.py_**: contains the implementation of a neural network architecture to predict the median house price in California
 
 ## Requirements
 IML_Artificial_Neural_Networks requires the following to run: 
 * ```Python3```
 * ```numpy ```
 * ```matplotlib```
-* ```PyTorch````
+* ```PyTorch```
 * ```scikit-learn```
 
 ## Run instructions:
