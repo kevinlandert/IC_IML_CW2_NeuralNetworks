@@ -2,7 +2,7 @@
 
 ## Description:
 
-This project contains the Introduction to Machine Learning Coursework 2 Decision Tree implementation by Daphne Demekas, Nasma Dasser, Constantin Eulenstein and Kevin Landert. The project is split into two parts. In the first part, we created a neural network mini-library using only ```NumPy```. In the second part we designed an algorithm using Neural Networks and ```PyTorch``` to predict the median house price in California. The report for the project is available under the _Intro_ML_Coursework2_report.pdf_ file.
+This project contains the Introduction to Machine Learning Coursework 2 Neural Networks implementation by Daphne Demekas, Nasma Dasser, Constantin Eulenstein and Kevin Landert. The project is split into two parts. In the first part, we created a neural network mini-library using only ```NumPy```. In the second part we designed an algorithm using Neural Networks and ```PyTorch``` to predict the median house price in California. The report for the project is available under the _Intro_ML_Coursework2_report.pdf_ file.
 
 
 ## Project structure:
